@@ -1,0 +1,31 @@
+/* Header */
+header .form-control { width: 260px; }
+
+/* List item */
+.list-group-item { cursor: pointer; }
+.list-group-item:hover { background-color: #f6f8fa; }
+
+/* Placeholder kolom kanan */
+.placeholder-area {
+  border: 1px dashed #dcdcdc;
+  min-height: 320px;
+  border-radius: 8px;
+  background: #fafafa;
+  display: flex; align-items: center; justify-content: center;
+}
+.placeholder-inner .icon { font-size: 1.6rem; margin-bottom: .25rem; }
+
+/* Box gambar di modal detail */
+.placeholder-box {
+  width: 200px; height: 180px;
+  border: 1px dashed #c9c9c9; border-radius: 6px;
+  color: #9a9a9a; background: #fafafa;
+  display: flex; flex-direction: column;
+  justify-content: center; gap: 6px;
+}
+.placeholder-box .icon { font-size: 2rem; }
+.placeholder-box .caption { font-size: .8rem; }
+
+/* Label & isi detail */
+dt { color: #6c757d; }
+dd { margin-bottom: .5rem; }
