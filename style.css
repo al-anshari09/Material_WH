@@ -1,9 +1,24 @@
 /* Header */
-header .form-control { width: 260px; }
+header .form-control { 
+  width: 260px; 
+  max-width: 48vw;
+}
+@media (max-width: 576px) {
+  header .form-control {
+    width: 180px;
+    max-width: 60vw;
+  }
+}
 
 /* List item */
-.list-group-item { cursor: pointer; }
-.list-group-item:hover { background-color: #f6f8fa; }
+.list-group-item { 
+  cursor: pointer; 
+  transition: background-color .15s ease, box-shadow .15s ease;
+}
+.list-group-item:hover { 
+  background-color: #f6f8fa; 
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.03);
+}
 
 /* Placeholder kolom kanan */
 .placeholder-area {
@@ -11,7 +26,16 @@ header .form-control { width: 260px; }
   min-height: 320px;
   border-radius: 8px;
   background: #fafafa;
-  display: flex; align-items: center; justify-content: center;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  padding: 16px;
+}
+.placeholder-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
 }
 .placeholder-inner .icon { font-size: 1.6rem; margin-bottom: .25rem; }
 
@@ -21,11 +45,17 @@ header .form-control { width: 260px; }
   border: 1px dashed #c9c9c9; border-radius: 6px;
   color: #9a9a9a; background: #fafafa;
   display: flex; flex-direction: column;
+  align-items: center;
   justify-content: center; gap: 6px;
+  padding: 8px;
+  text-align: center;
 }
 .placeholder-box .icon { font-size: 2rem; }
 .placeholder-box .caption { font-size: .8rem; }
 
 /* Label & isi detail */
-dt { color: #6c757d; }
+dt { color: var(--bs-secondary-color, #6c757d); }
 dd { margin-bottom: .5rem; }
+
+/* Pager alignment (optional) */
+#pager { justify-content: center; }
