@@ -70,6 +70,7 @@ function loadMaterials() {
     const s = localStorage.getItem(STORAGE_KEY);
     if (!s) return [...DEFAULT_MATERIALS];
     const arr = JSON.parse(s);
+    // beri default untuk field yang mungkin belum ada
     return arr.map(x => ({
       purchasing_group_name: "",
       part_number: "",
@@ -124,16 +125,20 @@ function renderList() {
   const start = (state.page - 1) * state.pageSize;
   const items = state.filtered.slice(start, start + state.pageSize);
 
-  resultListEl.innerHTML = items.map(it => `
-    <a class="list-group-item list-group-item-action" onclick="openDetail('${escapeAttr(it.material_no)}')">
-      <div class="d-flex justify-content-between">
-        <strong>${escapeHtml(it.material_no || "")}</strong>
-        <small class="text-muted">${escapeHtml(it.storage_location || "")}</small>
-      </div>
-      <div class="text-muted">${escapeHtml(it.material_text || "")}</div>
-      <div class="small text-secondary">PR: ${escapeHtml(it.pr_no || "-")} · PO: ${escapeHtml(it.po_no || "-")}</div>
-    </a>
-  `).join("");
+  if (!items.length) {
+    resultListEl.innerHTML = `
+      <div class="list-group-item text-muted small">No results</div>
+    `;
+  } else {
+    resultListEl.innerHTML = items.map(it => `
+      <a href="#" class="list-group-item list-group-item-action"
+         onclick="openDetail('${escapeAttr(it.material_no)}'); return false class="text-muted">${escapeHtml(it.storage_location || "")}</small>
+        </div>
+        <div class="text-muted">${escapeHtml(it.material_text || "")}</div>
+        <div class="small text-secondary">PR: ${escapeHtml(it.pr_no || "-")} · PO: ${escapeHtml(it.po_no || "-")}</div>
+      </a>
+    `).join("");
+  }
 
   buildPager();
 }
@@ -143,24 +148,33 @@ function buildPager() {
   const page = state.page;
 
   function li(p, label, disabled=false, active=false){
+    // gunakan <button> agar aksesibel & tidak perlu href
     return `
-      <li class="page-item ${disabled?"disabled":""} ${active?"active":""}">
-        #${label}</a>
+      <li class="page-item ${disabled ? "disabled" : ""} ${active ? "active" : ""}">
+        <button type="button" class="page-link"
+                ${disabled ? "tabindex='-1' aria-disabled='true'" : `onclick="gotoPage(${p})"`}
+        >${label}</button>
       </li>`;
   }
 
   let html = "";
-  html += li(Math.max(1, page-1), "Prev", page<=1, false);
+  html += li(Math.max(1, page-1), "Prev", page <= 1, false);
 
-  const start = Math.max(1, page-2);
-  const end   = Math.min(totalPages, page+2);
-  for(let i=start;i<=end;i++){ html += li(i, i, false, i===page); }
+  const start = Math.max(1, page - 2);
+  const end   = Math.min(totalPages, page + 2);
+  for (let i = start; i <= end; i++) {
+    html += li(i, i, false, i === page);
+  }
 
-  html += li(Math.min(totalPages, page+1), "Next", page>=totalPages, false);
+  html += li(Math.min(totalPages, page+1), "Next", page >= totalPages, false);
 
   pagerEl.innerHTML = html;
 }
-function gotoPage(p){ state.page = p; renderList(); }
+function gotoPage(p){
+  const totalPages = Math.max(1, Math.ceil(state.filtered.length / state.pageSize));
+  state.page = Math.min(totalPages, Math.max(1, p));
+  renderList();
+}
 
 /**************************************************
  *  DETAIL MODAL
@@ -195,7 +209,7 @@ function openDetail(materialNo) {
     <dd class="col-7 col-md-8">${escapeHtml(String(v ?? ""))}</dd>
   `).join("");
 
-  const modal = new bootstrap.Modal('#materialModal');
+  const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('materialModal'));
   modal.show();
 }
 
@@ -226,47 +240,3 @@ function saveNewMaterial(e){
   };
 
   if (!material.material_no || !material.material_text) {
-    alert("Material No dan Material Text wajib diisi.");
-    return;
-  }
-  if (MATERIALS.some(x => x.material_no === material.material_no)) {
-    alert("Material No sudah ada. Gunakan nomor lain atau edit data yang ada.");
-    return;
-  }
-
-  MATERIALS.unshift(material);
-  saveMaterials();
-
-  // reset pencarian & render
-  document.getElementById('searchInput').value = "";
-  state.q = "";
-  state.filtered = MATERIALS;
-  state.page = 1;
-  renderList();
-
-  // Tutup modal + reset form
-  bootstrap.Modal.getInstance(document.getElementById('addModal')).hide();
-  document.getElementById('addForm').reset();
-}
-
-/**************************************************
- *  UTILITAS
- **************************************************/
-function val(id){ return (document.getElementById(id).value || "").trim(); }
-function num(id){
-  const v = parseFloat((document.getElementById(id).value || "").trim());
-  return Number.isFinite(v) ? v : null;
-}
-function escapeHtml(s){
-  return String(s)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;");
-}
-function escapeAttr(s){
-  return String(s).replaceAll("'", "\\'");
-}
-function formatPrice(v){
-  if (v === undefined || v === null || v === "") return "";
-  return new Intl.NumberFormat('id-ID', { style:'currency', currency:'IDR', maximumFractionDigits:2 }).format(v);
-}
